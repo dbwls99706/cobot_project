@@ -1,0 +1,78 @@
+# Example Data
+pos1 = posx(347.96, 94.11, 100.00, 10.62, -179.61, 11.19) # Teaching pose1
+pos2 = posx(453.12, 93.34, 100.00, 11.26, -179.29, 12.02) # Teaching pose2
+pos3 = posx(345.88, -9.33, 100.00, 10.15, -179.08, 11.11) # Teaching pose3
+pos4 = posx(452.14, -8.28, 100.00, 16.39, -179.24, 17.11) # Teaching pose4
+direction = 0 # Normal Pallet -> 0: Snake, 1: Zigzag / Rhombus Pallet -> 2: Snake, 3: Zigzag
+row = 3
+column = 3
+stack = 1
+thickness = 0
+point_offset = [0, 0, 0] # Offset for calculated pose
+point_offset_reverse = [150, 0, 0]
+
+
+def grasp():
+    # SetNode
+    set_digital_output(1,ON)
+    # SetNode
+    set_digital_output(2,OFF)
+    # WaitNode
+    wait(0.30)
+    
+def place():
+    # SetNode
+    set_digital_output(1,OFF)
+    # SetNode
+    set_digital_output(2,ON)
+    # WaitNode
+    wait(0.30)
+    
+# Total count
+if direction < 2: # Normal Pallet
+    total_count = row * column * stack
+else: # Rhombus Pallet
+    total_count = (row * column - int(row/2)) * stack
+ 
+# Calculate Pallet Pose (Resulted in base coordinate)
+if(traffic == True):
+    movel(posx(0, 0, +65, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+
+ 
+# Calculate Pallet Pose (Resulted in base coordinate)
+for pallet_index in range(f4cnt, total_count):
+    Pallet_Pose = get_pattern_point(pos1, pos2, pos3, pos4, pallet_index, direction, row, column, stack, thickness, point_offset)
+    place()
+    movel(Pallet_Pose, radius=0.00, vel = 250, acc=30, ref=0, mod=DR_MV_MOD_ABS, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    movel(posx(0, 0, -65, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    traffic = True
+    grasp()
+    movel(posx(0, 0, +65, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    traffic = False
+    movel(posx(150, 0, 0, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    movel(posx(0, 0, -65, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    traffic = True
+    place()
+    movel(posx(0, 0, +65, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    traffic = False
+    f4cnt+=1
+for pallet_index in range(f4cnt, total_count+9):
+    Pallet_Pose_rev = get_pattern_point(pos1, pos2, pos3, pos4, pallet_index, direction, row, column, stack, thickness, point_offset_reverse)
+    place()
+    movel(Pallet_Pose_rev, radius=0.00, vel = 90, acc=30, ref=0, mod=DR_MV_MOD_ABS, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    movel(posx(0, 0, -65, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    traffic = True
+    grasp()
+    movel(posx(0, 0, +65, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    traffic = False
+    movel(posx(-150, 0, 0, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    movel(posx(0, 0, -65, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    traffic = True
+    place()
+    f4cnt+=1
+    #wtf
+    movel(posx(0, 0, +65, 0, 0, 0), vel = 250, acc=30, ref=0, mod=DR_MV_MOD_REL, ra=DR_MV_RA_DUPLICATE, app_type=DR_MV_APP_NONE)
+    traffic = False
+
+place()
+f4cnt = 0
